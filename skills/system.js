@@ -1,6 +1,55 @@
 import os from "os";
 import { formatDuration, formatBytes } from "../lib/helpers.js";
 
+/**
+ * Helper to build the formatted dynamic menu string
+ */
+export function buildMenuText({ config, skills }) {
+  const prefix = config.prefix || ".";
+  const categorized = {};
+  for (const skill of skills.values()) {
+    const cat = skill.category || "lainnya";
+    if (!categorized[cat]) categorized[cat] = [];
+    categorized[cat].push(skill);
+  }
+
+  let menuText =
+    `✨ *${(config.botName || "Wabot Starter").toUpperCase()} - MENU UTAMA* ✨\n` +
+    `──────────────────────────\n` +
+    `👤 *Owner:* ${config.ownerName || "Hann"}\n` +
+    `⚡ *Prefix:* [ \`${prefix}\` ]\n` +
+    `📦 *Modul:* ${skills.size} Kategori Skill\n` +
+    `🕒 *Waktu:* ${new Date().toLocaleTimeString("id-ID")}\n` +
+    `──────────────────────────\n\n`;
+
+  const categoryIcons = {
+    system: "⚙️ SISTEM & INFORMASI",
+    sticker: "🎨 STIKER & GRAFIS",
+    downloader: "📥 DOWNLOADER MEDIA",
+    group: "👥 MANAJEMEN GRUP",
+    tools: "🛠️ UTILITY & INFORMASI",
+    games: "🎮 PERMAINAN & INTERAKTIF",
+    lainnya: "📌 PERINTAH LAINNYA"
+  };
+
+  for (const [cat, skillList] of Object.entries(categorized)) {
+    const catTitle = categoryIcons[cat] || `📁 ${cat.toUpperCase()}`;
+    menuText += `*${catTitle}*\n`;
+    for (const s of skillList) {
+      const cmdList = s.commands.map((c) => `\`${prefix}${c}\``).join(", ");
+      menuText += `• ${cmdList}\n  _${s.description || "-"}\n`;
+    }
+    menuText += `\n`;
+  }
+
+  menuText +=
+    `──────────────────────────\n` +
+    `💡 *Tips:* Ketik perintah diawali dengan prefix \`${prefix}\`\n` +
+    `🚀 *Repository:* https://github.com/HannStillHere/wabot-skills-starter`;
+
+  return menuText;
+}
+
 export default {
   name: "System & Info",
   category: "system",
@@ -38,48 +87,7 @@ export default {
     }
 
     // Command: .menu / .help
-    // Group skills by category
-    const categorized = {};
-    for (const skill of skills.values()) {
-      const cat = skill.category || "lainnya";
-      if (!categorized[cat]) categorized[cat] = [];
-      categorized[cat].push(skill);
-    }
-
-    let menuText =
-      `✨ *${config.botName.toUpperCase()} - MENU UTAMA* ✨\n` +
-      `──────────────────────────\n` +
-      `👤 *Owner:* ${config.ownerName}\n` +
-      `⚡ *Prefix:* [ \`${prefix}\` ]\n` +
-      `📦 *Modul:* ${skills.size} Kategori Skill\n` +
-      `🕒 *Waktu Server:* ${new Date().toLocaleTimeString("id-ID")}\n` +
-      `──────────────────────────\n\n`;
-
-    const categoryIcons = {
-      system: "⚙️ SISTEM & INFORMASI",
-      sticker: "🎨 STIKER & GRAFIS",
-      downloader: "📥 DOWNLOADER MEDIA",
-      group: "👥 MANAJEMEN GRUP",
-      tools: "🛠️ UTILITY & INFORMASI",
-      games: "🎮 PERMAINAN & INTERAKTIF",
-      lainnya: "📌 PERINTAH LAINNYA"
-    };
-
-    for (const [cat, skillList] of Object.entries(categorized)) {
-      const catTitle = categoryIcons[cat] || `📁 ${cat.toUpperCase()}`;
-      menuText += `*${catTitle}*\n`;
-      for (const s of skillList) {
-        const cmdList = s.commands.map((c) => `\`${prefix}${c}\``).join(", ");
-        menuText += `• ${cmdList}\n  _${s.description || "-"}\n`;
-      }
-      menuText += `\n`;
-    }
-
-    menuText +=
-      `──────────────────────────\n` +
-      `💡 *Tips:* Ketik perintah dengan awalan prefix \`${prefix}\`\n` +
-      `🚀 *Repository:* https://github.com/HannStillHere/wabot-skills-starter`;
-
+    const menuText = buildMenuText({ config, skills });
     await sock.sendMessage(remoteJid, { text: menuText }, { quoted: m });
   }
 };

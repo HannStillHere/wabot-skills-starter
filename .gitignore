@@ -20,6 +20,7 @@ temp/
 qr.png
 pause_state.json
 msg_store.json
+welcomed_users.json
 
 # OS Specific
 .DS_Store

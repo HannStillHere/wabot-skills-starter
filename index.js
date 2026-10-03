@@ -12,6 +12,7 @@ import QRCode from "qrcode";
 import qrcodeTerminal from "qrcode-terminal";
 import { pathToFileURL } from "url";
 import { unwrapMessage, findMediaMessage } from "./lib/helpers.js";
+import { buildMenuText } from "./skills/system.js";
 
 // Load configuration with fallback to config.example.json
 let config = {
@@ -22,7 +23,8 @@ let config = {
   packname: "Wabot Skills Starter",
   author: "Hann.67",
   port: 3000,
-  autoRead: false
+  autoRead: false,
+  firstChatWelcome: true
 };
 
 const CONFIG_PATH = path.resolve("./config.json");
@@ -48,6 +50,23 @@ let currentQrDataUrl = "";
 let isConnected = false;
 let botUser = null;
 const loadedSkills = new Map();
+
+// Persistent tracking of welcomed users for private chat greeting
+const WELCOMED_FILE = path.resolve("./welcomed_users.json");
+let welcomedUsers = new Set();
+try {
+  if (fs.existsSync(WELCOMED_FILE)) {
+    welcomedUsers = new Set(JSON.parse(fs.readFileSync(WELCOMED_FILE, "utf8")));
+  }
+} catch {
+  welcomedUsers = new Set();
+}
+
+function saveWelcomedUsers() {
+  try {
+    fs.writeFileSync(WELCOMED_FILE, JSON.stringify(Array.from(welcomedUsers), null, 2), "utf8");
+  } catch {}
+}
 
 /**
  * Dynamically load all skills from the skills/ directory
@@ -227,19 +246,37 @@ async function startBot() {
       const cleanText = text.trim();
       if (!cleanText) continue;
 
-      // Check prefix
-      const prefix = config.prefix || ".";
-      if (!cleanText.startsWith(prefix)) continue;
-
-      const args = cleanText.slice(prefix.length).trim().split(/\s+/);
-      const command = (args.shift() || "").toLowerCase();
-
       const rawSender = isGroup ? (msg.key.participant || msg.participant || "") : remoteJid;
       const senderNum = rawSender.split("@")[0].split(":")[0].replace(/\D/g, "");
       const senderName = msg.pushName || "Pengguna";
 
       const cleanOwnerNum = (config.ownerNumber || "").replace(/\D/g, "");
       const isOwner = msg.key.fromMe || (cleanOwnerNum && senderNum.endsWith(cleanOwnerNum));
+
+      // ----------------------------------------------------
+      // FIRST-TIME PRIVATE CHAT AUTO-WELCOME GREETING
+      // ----------------------------------------------------
+      if (!isGroup && !msg.key.fromMe && config.firstChatWelcome !== false) {
+        if (!welcomedUsers.has(senderNum)) {
+          welcomedUsers.add(senderNum);
+          saveWelcomedUsers();
+
+          const menu = buildMenuText({ config, skills: loadedSkills });
+          const welcomeGreeting =
+            `👋 *HI ini adalah bot modular template yang dibuat oleh HannStillHere*\n\n` +
+            `Nomor ini sekarang bertindak sebagai bot otomatis. Berikut adalah menu dan fitur apa saja yang bisa dilakukan:\n\n` +
+            `${menu}`;
+
+          await sock.sendMessage(remoteJid, { text: welcomeGreeting }, { quoted: msg });
+        }
+      }
+
+      // Check prefix
+      const prefix = config.prefix || ".";
+      if (!cleanText.startsWith(prefix)) continue;
+
+      const args = cleanText.slice(prefix.length).trim().split(/\s+/);
+      const command = (args.shift() || "").toLowerCase();
 
       // Find matching skill by command name or aliases
       let matchedSkill = null;

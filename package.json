@@ -1,0 +1,32 @@
+{
+  "name": "wabot-skills-starter",
+  "version": "1.0.0",
+  "description": "Clean, modular, and extensible WhatsApp Bot Starter Kit with plug-and-play skills. 100% Non-AI, zero API keys required.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "whatsapp",
+    "whatsapp-bot",
+    "baileys",
+    "bot-starter",
+    "modular",
+    "sticker-bot",
+    "downloader",
+    "multi-device"
+  ],
+  "author": "HannStillHere",
+  "license": "MIT",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.13",
+    "express": "^4.21.2",
+    "node-webpmux": "^3.2.1",
+    "pino": "^9.6.0",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "sharp": "^0.33.5",
+    "wa-sticker-formatter": "^4.4.4"
+  }
+}

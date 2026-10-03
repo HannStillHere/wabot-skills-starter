@@ -1,0 +1,26 @@
+# WhatsApp Authentication State (NEVER COMMIT)
+auth_info/
+session*/
+*.session
+creds.json
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment & Config
+config.json
+.env
+.env.local
+
+# Temp & Runtime Files
+tmp/
+temp/
+*.log
+qr.png
+pause_state.json
+msg_store.json
+
+# OS Specific
+.DS_Store
+Thumbs.db

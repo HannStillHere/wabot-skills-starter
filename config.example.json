@@ -1,0 +1,10 @@
+{
+  "botName": "Wabot Starter",
+  "ownerName": "Your Name",
+  "ownerNumber": "628xxxxxxxxxx",
+  "prefix": ".",
+  "packname": "Wabot Skills Starter",
+  "author": "Hann.67",
+  "port": 3000,
+  "autoRead": false
+}
